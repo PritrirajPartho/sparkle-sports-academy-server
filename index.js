@@ -54,6 +54,12 @@ async function run() {
       res.send(result);
     });
 
+   app.post('/bookeds', async (req, res) => {
+    const item = req.body;
+    // console.log(item);
+    const result = await bookedCollection.insertOne(item);
+    res.send(result);
+  })
 
 
 
