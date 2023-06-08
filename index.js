@@ -27,6 +27,23 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    /*Start work To here Bro.................... */
+    const classesCollection = client.db("campDb").collection("classes");
+    const bookedCollection = client.db("campDb").collection("booked");
+
+
+    //classes related
+    app.get('/classes', async(req, res) => {
+      const result = await classesCollection.find().toArray();
+      res.send(result);
+    })
+
+   //booked
+    app.get('/bookeds', async (req, res) => {
+      const email = req.query.email;
+
+
+
 
 
 
@@ -39,8 +56,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
 
 
 app.get('/', (req, res) => {
