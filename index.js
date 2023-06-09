@@ -30,7 +30,23 @@ async function run() {
     /*Start work To here Bro.................... */
     const classesCollection = client.db("campDb").collection("classes");
     const bookedCollection = client.db("campDb").collection("booked");
+    const usersCollection = client.db("campDb").collection("users");
+    
 
+    // users relatd apis.......
+    app.post('/users', async (req, res) => {
+        const user = req.body;
+        const query = { email: user.email }
+        const existingUser = await usersCollection.findOne(query);
+
+        if (existingUser) {
+          return res.send({ message: 'user already exists' })
+        }
+        else{
+          const result = await usersCollection.insertOne(user);
+          res.send(result);
+        }
+    });
 
     //classes related
     app.get('/classes', async(req, res) => {
@@ -54,14 +70,19 @@ async function run() {
       res.send(result);
     });
 
-   app.post('/bookeds', async (req, res) => {
-    const item = req.body;
-    // console.log(item);
-    const result = await bookedCollection.insertOne(item);
-    res.send(result);
-  })
+    app.post('/bookeds', async (req, res) => {
+      const item = req.body;
+      // console.log(item);
+      const result = await bookedCollection.insertOne(item);
+      res.send(result);
+    })
 
-
+    app.delete('/booked/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookedCollection.deleteOne(query);
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
