@@ -136,7 +136,7 @@ async function run() {
       if (email !== decodedEmail) {
         return res.status(403).send({ error: true, message: 'forbidden access' })
       }
-      
+
       const query = { email: email };
       const result = await bookedCollection.find(query).toArray();
       res.send(result);
