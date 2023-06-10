@@ -149,13 +149,25 @@ async function run() {
         res.send(result);
     })
 
+    app.get('/classes/instructor', async(req, res) => {
+        const email = req.query.email;
+        const query = { email: email };
+        const result = await classesCollection.find(query).toArray();
+        res.send(result);
+    })
+
+    app.get('/classes/:email', async(req, res) => {
+        const result = await classesCollection.find().toArray();
+        res.send(result);
+    })
+
     app.post('/classes', async (req, res) => {
         const claass = req.body;
         const result = await classesCollection.insertOne(claass);
         res.send(result);
     })
 
-   //booked
+   //booked collection work
     app.get('/bookeds', verifyJWT, async (req, res) => {
       const email = req.query.email;
 
