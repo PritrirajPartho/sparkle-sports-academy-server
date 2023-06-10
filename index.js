@@ -48,8 +48,9 @@ async function run() {
     const classesCollection = client.db("campDb").collection("classes");
     const bookedCollection = client.db("campDb").collection("booked");
     const usersCollection = client.db("campDb").collection("users");
+    const instructorsCollection = client.db("campDb").collection("instructors");
     
-
+    //jwt work is here
     app.post('/jwt', (req, res) => {
         const user = req.body;
         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
@@ -143,7 +144,7 @@ async function run() {
 
     })
 
-    //classes related
+    //classes related apis
     app.get('/classes', async(req, res) => {
         const status = req.query.status;
         const query = { status: status };
@@ -169,7 +170,7 @@ async function run() {
         res.send(result);
     })
 
-   //booked collection work
+   //booked collection works
     app.get('/bookeds', verifyJWT, async (req, res) => {
       const email = req.query.email;
 
@@ -200,6 +201,14 @@ async function run() {
       const result = await bookedCollection.deleteOne(query);
       res.send(result);
     })
+
+
+   //instructors apis
+   
+   app.get('/instructors', async(req, res) => {
+      const result = await instructorsCollection.find().toArray();
+      res.send(result);
+   })
 
 
     // Send a ping to confirm a successful connection
