@@ -145,8 +145,14 @@ async function run() {
 
     //classes related
     app.get('/classes', async(req, res) => {
-      const result = await classesCollection.find().toArray();
-      res.send(result);
+        const result = await classesCollection.find().toArray();
+        res.send(result);
+    })
+
+    app.post('/classes', async (req, res) => {
+        const claass = req.body;
+        const result = await classesCollection.insertOne(claass);
+        res.send(result);
     })
 
    //booked
