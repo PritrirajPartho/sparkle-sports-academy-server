@@ -6,6 +6,8 @@ require("dotenv").config();
 const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
+
+// TODO: ADD JWT AND VERIFY ADMIN
 //middleware..........
 app.use(cors());
 app.use(express.json());
@@ -103,7 +105,9 @@ async function run() {
     });
 
     app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
-      const result = await usersCollection.find().toArray();
+      const role = req.query.role;
+      const query = { role: role };
+      const result = await usersCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -149,11 +153,12 @@ async function run() {
     });
 
     //classes related apis
-    app.get("/classes", async (req, res) => {
+    app.get("/classes", verifyJWT, verifyAdmin, async (req, res) => {
       const status = req.query.status;
       const query = { status: status };
       const result = await classesCollection.find(query).toArray();
-      res.send(result);
+      const outQueryResult = await classesCollection.find().toArray();
+      res.send({result, outQueryResult});
     });
 
     app.get("/classes/instructor", async (req, res) => {
@@ -173,6 +178,48 @@ async function run() {
       const result = await classesCollection.insertOne(claass);
       res.send(result);
     });
+
+
+    app.patch("/classes/approve/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    
+    app.patch("/classes/deny/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
+        },
+      };
+
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+
+    // app.patch("/classes/feedback/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const updateDoc = {
+    //     $set: {
+    //       status: "denied",
+    //     },
+    //   };
+
+    //   const result = await classesCollection.updateOne(filter, updateDoc);
+    //   res.send(result);
+    // });
+
 
     //booked collection works
     app.get("/bookeds", verifyJWT, async (req, res) => {
@@ -210,7 +257,7 @@ async function run() {
 
     //instructors apis
 
-    app.get("/instructors", async (req, res) => {
+    app.get("/instructors", verifyJWT, async (req, res) => {
       const result = await instructorsCollection.find().toArray();
       res.send(result);
     });
@@ -239,6 +286,21 @@ async function run() {
       const deleteResult = await bookedCollection.deleteOne(query);
 
       res.send({ insertResult, deleteResult });
+    });
+
+
+    app.get("/payments",  async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const sort = req.query.sort;
+      const options = {
+        // sort matched documents in descending order by rating
+        sort: {
+          date: sort == "asc" ? 1 : -1,
+        },
+      };
+      const result = await paymentCollection.find(query, options).toArray();
+      res.send(result);
     });
 
 
